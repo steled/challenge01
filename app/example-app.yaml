@@ -1,0 +1,45 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: example-app
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: example-app-service
+  namespace: example-app
+spec:
+  selector:
+    app: example-app
+  ports:
+  - protocol: "TCP"
+    port: 5001
+    targetPort: 5000
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: example-app
+  namespace: example-app
+spec:
+  selector:
+    matchLabels:
+      app: example-app
+  replicas: 2
+  template:
+    metadata:
+      annotations:
+        prometheus_io_scrape: "true"
+        prometheus_io_port: "5000"
+        prometheus_io_path: "/metrics"
+      labels:
+        app: example-app
+    spec:
+      containers:
+      - name: example-app
+        image: steled/example-app:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 5000

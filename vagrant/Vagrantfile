@@ -1,0 +1,39 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+BASE_BOX = "hashicorp/bionic64"
+BOX_VERSION = "1.0.282"
+
+NODE_RAM_MB = "2048"
+
+#@control01_ip = "172.100.17.10"
+
+Vagrant.configure("2") do |config|
+  config.vm.box = BASE_BOX
+  config.vm.box_version = BOX_VERSION
+
+  config.vm.box_check_update = false
+  config.vm.network "public_network", bridge: "Default Switch"
+  config.vm.synced_folder ".", "/vagrant", disabled: true
+
+  config.vm.define "node01" do |node01|
+    node01.vm.hostname = "node01"
+    node01.vm.provider "hyperv" do |hv|
+      hv.vmname = "node01_challenge"
+      hv.cpus = 2
+      hv.memory = NODE_RAM_MB
+      hv.maxmemory = NODE_RAM_MB
+      hv.vm_integration_services = {
+        gastdienstschnittstelle: false,
+        takt: true,
+        #austausch_von_schluesselwertepaaren: true,
+        herunterfahren: true,
+        zeitsynchronisierung: true,
+        vss: true
+      }
+    end
+    node01.vm.provision "shell", inline: "sudo apt update"
+    node01.vm.provision "shell", inline: "sudo apt-get install bash-completion"
+    node01.vm.provision "shell", inline: "sudo apt upgrade -y"
+#    node01.vm.provision "shell", inline: "sudo -- sh -c \"sed -i -e 's/iface eth0 inet dhcp/iface eth0 inet static/' -e '/iface eth0 inet static/a address #{@control01_ip}' -e '/dns-nameserver 4.2.2.1/i gateway 172.100.17.1' /etc/network/interfaces\""
+  end
+end
