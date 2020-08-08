@@ -1,0 +1,6 @@
+# action.yml
+name: 'challenge01'
+description: 'tst for challenge'
+runs:
+  using: 'docker'
+  image: 'docker://steled/example-app:latest'
