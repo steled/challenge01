@@ -3,11 +3,17 @@
 BASE_BOX = "hashicorp/bionic64"
 BOX_VERSION = "1.0.282"
 
+NODE_NAME = "node02_challenge"
 NODE_RAM_MB = "2048"
 
-#@control01_ip = "172.100.17.10"
+@node_name = NODE_NAME
+@node_ip = "172.100.17.31"
 
 Vagrant.configure("2") do |config|
+  config.trigger.before :up do |trigger|
+    trigger.info = "Creating 'NET_172.100.17.0' Hyper-V switch if it does not exist"
+    trigger.run = {privileged: "true", powershell_elevated_interactive: "true", path: "./scripts/create-nat-hyperv-switch.ps1"}
+  end
   config.vm.box = BASE_BOX
   config.vm.box_version = BOX_VERSION
 
@@ -15,10 +21,10 @@ Vagrant.configure("2") do |config|
   config.vm.network "public_network", bridge: "Default Switch"
   config.vm.synced_folder ".", "/vagrant", disabled: true
 
-  config.vm.define "node01" do |node01|
-    node01.vm.hostname = "node01"
-    node01.vm.provider "hyperv" do |hv|
-      hv.vmname = "node01_challenge"
+  config.vm.define "node02" do |node02|
+    node02.vm.hostname = "node02"
+    node02.vm.provider "hyperv" do |hv|
+      hv.vmname = NODE_NAME
       hv.cpus = 2
       hv.memory = NODE_RAM_MB
       hv.maxmemory = NODE_RAM_MB
@@ -31,9 +37,32 @@ Vagrant.configure("2") do |config|
         vss: true
       }
     end
-    node01.vm.provision "shell", inline: "sudo apt update"
-    node01.vm.provision "shell", inline: "sudo apt-get install bash-completion"
-    node01.vm.provision "shell", inline: "sudo apt upgrade -y"
-#    node01.vm.provision "shell", inline: "sudo -- sh -c \"sed -i -e 's/iface eth0 inet dhcp/iface eth0 inet static/' -e '/iface eth0 inet static/a address #{@control01_ip}' -e '/dns-nameserver 4.2.2.1/i gateway 172.100.17.1' /etc/network/interfaces\""
+    node02.vm.provision "shell", inline: "sudo apt update"
+    node02.vm.provision "shell", inline: "sudo apt-get install bash-completion"
+    node02.vm.provision "shell", inline: "sudo apt upgrade -y"
+    node02.vm.provision "shell", inline: "curl https://releases.rancher.com/install-docker/19.03.sh | sh"
+    node02.vm.provision "shell", inline: "sudo usermod -aG docker vagrant"
+    node02.vm.provision "shell", inline: "curl -sfL https://get.k3s.io | sh -s - --docker"
+    node02.vm.provision "shell", inline: "sudo -- sh -c \"kubectl completion bash > /etc/bash_completion.d/kubectl\""
+    node02.vm.provision "shell", inline: "git clone https://github.com/steled/challenge01.git /challenge/"
+    node02.vm.provision "shell", inline: "sudo -- sh -c \"sed -i -e 's/dhcp4: true/dhcp4: no/' /etc/netplan/01-netcfg.yaml\""
+    node02.vm.provision "shell", inline: "sudo -- sh -c \"echo '      addresses: [#{@node_ip}/24]' >> /etc/netplan/01-netcfg.yaml\""
+    node02.vm.provision "shell", inline: "sudo -- sh -c \"echo '      gateway4: 172.100.17.1' >> /etc/netplan/01-netcfg.yaml\""
+    node02.vm.provision "shell", inline: "sudo -- sh -c \"echo '      nameservers:' >> /etc/netplan/01-netcfg.yaml\""
+    node02.vm.provision "shell", inline: "sudo -- sh -c \"echo '        addresses: [8.8.8.8,8.8.4.4]' >> /etc/netplan/01-netcfg.yaml\""
+    node02.vm.provision "shell", inline: "sudo kubectl apply -f /challenge/prometheus-deployment_v2.yaml"
+    node02.vm.provision "shell", inline: "sudo kubectl apply -f /challenge/grafana-deployment.yaml"
+    node02.vm.provision "shell", inline: "cd /challenge/app/; docker build -t steled/example-app ."
+    node02.vm.provision "shell", inline: "sudo kubectl apply -f /challenge/app/example-app.yaml"
+    node02.trigger.after :up do |trigger|
+      trigger.name = "Rebooting System"
+      trigger.info = "Rebooting System"
+      trigger.run_remote = {inline: "reboot"}
+    end
+    node02.trigger.after :up do |trigger|
+      trigger.name = "Resetting VM Switch"
+      trigger.info = "Resetting VM Switch"
+      trigger.run = {inline: "get-vm -Name #{@node_name} | Get-VMNetworkAdapter | Connect-VMNetworkAdapter -SwitchName \"NET_172.100.17.0\""}
+    end
   end
 end
