@@ -9,10 +9,12 @@ PrometheusMetrics(app)
 
 endpoints = ('one', 'two', 'three', 'four', 'five', 'error')
 
+
 @app.route('/one')
 def first_route():
     time.sleep(random.random() * 0.2)
     return 'ok'
+
 
 @app.route('/two')
 def the_second():
@@ -35,6 +37,7 @@ def fourth_one():
 @app.route('/error')
 def oops():
     return ':(', 500
+
 
 @app.route("/")
 def hello():
