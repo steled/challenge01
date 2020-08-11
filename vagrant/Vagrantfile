@@ -3,11 +3,11 @@
 BASE_BOX = "hashicorp/bionic64"
 BOX_VERSION = "1.0.282"
 
-NODE_NAME = "node02_challenge"
+NODE01_NAME = "node01_challenge"
 NODE_RAM_MB = "2048"
 
-@node_name = NODE_NAME
-@node_ip = "172.100.17.31"
+@node01_name = NODE01_NAME
+@node01_ip = "172.100.17.31"
 
 Vagrant.configure("2") do |config|
   config.trigger.before :up do |trigger|
@@ -21,9 +21,9 @@ Vagrant.configure("2") do |config|
   config.vm.network "public_network", bridge: "Default Switch"
   config.vm.synced_folder ".", "/vagrant", disabled: true
 
-  config.vm.define "node02" do |node02|
-    node02.vm.hostname = "node02"
-    node02.vm.provider "hyperv" do |hv|
+  config.vm.define "node01" do |node01|
+    node01.vm.hostname = "node01"
+    node01.vm.provider "hyperv" do |hv|
       hv.vmname = NODE_NAME
       hv.cpus = 2
       hv.memory = NODE_RAM_MB
@@ -37,33 +37,33 @@ Vagrant.configure("2") do |config|
         vss: true
       }
     end
-    node02.vm.provision "shell", inline: "sudo apt update"
-    node02.vm.provision "shell", inline: "sudo apt-get install -y bash-completion"
-    node02.vm.provision "shell", inline: "sudo apt upgrade -y"
-    node02.vm.provision "shell", inline: "curl https://releases.rancher.com/install-docker/19.03.sh | sh"
-    node02.vm.provision "shell", inline: "sudo usermod -aG docker vagrant"
-    node02.vm.provision "shell", inline: "curl -sfL https://get.k3s.io | sh -s - --docker"
-    node02.vm.provision "shell", inline: "sudo -- sh -c \"kubectl completion bash > /etc/bash_completion.d/kubectl\""
-    node02.vm.provision "shell", inline: "git clone https://github.com/steled/challenge01.git /challenge/"
-    node02.vm.provision "shell", inline: "sudo -- sh -c \"sed -i -e 's/dhcp4: true/dhcp4: no/' /etc/netplan/01-netcfg.yaml\""
-    node02.vm.provision "shell", inline: "sudo -- sh -c \"echo '      addresses: [#{@node_ip}/24]' >> /etc/netplan/01-netcfg.yaml\""
-    node02.vm.provision "shell", inline: "sudo -- sh -c \"echo '      gateway4: 172.100.17.1' >> /etc/netplan/01-netcfg.yaml\""
-    node02.vm.provision "shell", inline: "sudo -- sh -c \"echo '      nameservers:' >> /etc/netplan/01-netcfg.yaml\""
-    node02.vm.provision "shell", inline: "sudo -- sh -c \"echo '        addresses: [8.8.8.8,8.8.4.4]' >> /etc/netplan/01-netcfg.yaml\""
-    node02.vm.provision "shell", inline: "sudo kubectl apply -f /challenge/prometheus-deployment_v2.yaml"
-    node02.vm.provision "shell", inline: "sudo kubectl apply -f /challenge/grafana-deployment.yaml"
-    node02.vm.provision "shell", inline: "cd /challenge/app/; docker build -t steled/example-app ."
-    node02.vm.provision "shell", inline: "sudo kubectl apply -f /challenge/app/example-app.yaml"
-    node02.vm.provision "shell", inline: "cd /tmp; wget https://golang.org/dl/go1.14.7.linux-amd64.tar.gz; tar xf go1.14.7.linux-amd64.tar.gz; sudo mv go /usr/local/go-1.14"
-    node02.trigger.after :up do |trigger|
+    node01.vm.provision "shell", inline: "sudo apt update"
+    node01.vm.provision "shell", inline: "sudo apt-get install -y bash-completion"
+    node01.vm.provision "shell", inline: "sudo apt upgrade -y"
+    node01.vm.provision "shell", inline: "curl https://releases.rancher.com/install-docker/19.03.sh | sh"
+    node01.vm.provision "shell", inline: "sudo usermod -aG docker vagrant"
+    node01.vm.provision "shell", inline: "curl -sfL https://get.k3s.io | sh -s - --docker"
+    node01.vm.provision "shell", inline: "sudo -- sh -c \"kubectl completion bash > /etc/bash_completion.d/kubectl\""
+    node01.vm.provision "shell", inline: "git clone https://github.com/steled/challenge01.git /challenge/"
+    node01.vm.provision "shell", inline: "sudo -- sh -c \"sed -i -e 's/dhcp4: true/dhcp4: no/' /etc/netplan/01-netcfg.yaml\""
+    node01.vm.provision "shell", inline: "sudo -- sh -c \"echo '      addresses: [#{@node01_ip}/24]' >> /etc/netplan/01-netcfg.yaml\""
+    node01.vm.provision "shell", inline: "sudo -- sh -c \"echo '      gateway4: 172.100.17.1' >> /etc/netplan/01-netcfg.yaml\""
+    node01.vm.provision "shell", inline: "sudo -- sh -c \"echo '      nameservers:' >> /etc/netplan/01-netcfg.yaml\""
+    node01.vm.provision "shell", inline: "sudo -- sh -c \"echo '        addresses: [8.8.8.8,8.8.4.4]' >> /etc/netplan/01-netcfg.yaml\""
+    node01.vm.provision "shell", inline: "sudo kubectl apply -f /challenge/prometheus-deployment_v2.yaml"
+    node01.vm.provision "shell", inline: "sudo kubectl apply -f /challenge/grafana-deployment.yaml"
+    node01.vm.provision "shell", inline: "cd /challenge/app/; docker build -t steled/example-app ."
+    node01.vm.provision "shell", inline: "sudo kubectl apply -f /challenge/app/example-app.yaml"
+    node01.vm.provision "shell", inline: "cd /tmp; wget https://golang.org/dl/go1.14.7.linux-amd64.tar.gz; tar xf go1.14.7.linux-amd64.tar.gz; sudo mv go /usr/local/go-1.14"
+    node01.trigger.after :up do |trigger|
       trigger.name = "Rebooting System"
       trigger.info = "Rebooting System"
       trigger.run_remote = {inline: "reboot"}
     end
-    node02.trigger.after :up do |trigger|
+    node01.trigger.after :up do |trigger|
       trigger.name = "Resetting VM Switch"
       trigger.info = "Resetting VM Switch"
-      trigger.run = {inline: "get-vm -Name #{@node_name} | Get-VMNetworkAdapter | Connect-VMNetworkAdapter -SwitchName \"NET_172.100.17.0\""}
+      trigger.run = {inline: "get-vm -Name #{@node01_name} | Get-VMNetworkAdapter | Connect-VMNetworkAdapter -SwitchName \"NET_172.100.17.0\""}
     end
   end
 end
