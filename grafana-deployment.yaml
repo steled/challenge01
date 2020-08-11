@@ -115,7 +115,6 @@ data:
       "editable": true,
       "gnetId": null,
       "graphTooltip": 0,
-      "id": 1,
       "links": [],
       "panels": [
         {
@@ -139,7 +138,8 @@ data:
             "y": 0
           },
           "hiddenSeries": false,
-          "id": 4,
+          "id": 10,
+          "interval": "",
           "legend": {
             "avg": false,
             "current": false,
@@ -151,6 +151,7 @@ data:
           },
           "lines": true,
           "linewidth": 1,
+          "maxDataPoints": 1019,
           "nullPointMode": "null",
           "percentage": false,
           "pluginVersion": "7.1.3",
@@ -163,11 +164,11 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "rate(process_cpu_seconds_total[5m])",
-              "format": "time_series",
+              "expr": "rate(flask_http_request_total[2m])",
               "instant": false,
               "interval": "",
-              "legendFormat": "{{kubernetes_pod_name}}",
+              "intervalFactor": 1,
+              "legendFormat": "Pod: {{kubernetes_pod_name}} Status: {{status}}",
               "refId": "A"
             }
           ],
@@ -175,13 +176,12 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Process CPU sec Total",
+          "title": "Total requests per pod per status",
           "tooltip": {
             "shared": true,
             "sort": 0,
             "value_type": "individual"
           },
-          "transformations": [],
           "type": "graph",
           "xaxis": {
             "buckets": null,
@@ -192,6 +192,7 @@ data:
           },
           "yaxes": [
             {
+              "$$hashKey": "object:112",
               "format": "short",
               "label": null,
               "logBase": 1,
@@ -200,6 +201,7 @@ data:
               "show": true
             },
             {
+              "$$hashKey": "object:113",
               "format": "short",
               "label": null,
               "logBase": 1,
@@ -258,7 +260,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "rate(flask_http_request_total{status=\"200\"}[5m])",
+              "expr": "process_resident_memory_bytes{job=\"kubernetes-pods\"}",
               "format": "time_series",
               "instant": false,
               "interval": "",
@@ -271,7 +273,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "HTTP Request Total",
+          "title": "Memory usage per pod",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -308,6 +310,287 @@ data:
             "align": false,
             "alignLevel": null
           }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 8
+          },
+          "hiddenSeries": false,
+          "id": 8,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "percentage": false,
+          "pluginVersion": "7.1.3",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(flask_http_request_duration_seconds_count{status!=\"200\"}[5m]))",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Sum of errors per second",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 9
+          },
+          "hiddenSeries": false,
+          "id": 4,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "percentage": false,
+          "pluginVersion": "7.1.3",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "rate(process_cpu_seconds_total[5m])",
+              "format": "time_series",
+              "instant": false,
+              "interval": "",
+              "legendFormat": "{{kubernetes_pod_name}}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "CPU usage per pod",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "transformations": [],
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 16
+          },
+          "hiddenSeries": false,
+          "id": 6,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "percentage": false,
+          "pluginVersion": "7.1.3",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "rate(flask_http_request_duration_seconds_count{status=\"200\"}[2m])",
+              "interval": "",
+              "legendFormat": "{{path}}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Requests per second per path",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "$$hashKey": "object:165",
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "$$hashKey": "object:166",
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
         }
       ],
       "schemaVersion": 26,
@@ -317,7 +600,7 @@ data:
         "list": []
       },
       "time": {
-        "from": "now-6h",
+        "from": "now-15m",
         "to": "now"
       },
       "timepicker": {
@@ -337,5 +620,5 @@ data:
       "timezone": "",
       "title": "challenge01",
       "uid": "Dc0d85SGz",
-      "version": 6
+      "version": 1
     }
