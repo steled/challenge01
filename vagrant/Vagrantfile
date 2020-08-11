@@ -38,7 +38,7 @@ Vagrant.configure("2") do |config|
       }
     end
     node01.vm.provision "shell", inline: "sudo apt update"
-    node01.vm.provision "shell", inline: "sudo apt-get install -y bash-completion"
+    node01.vm.provision "shell", inline: "sudo apt-get install -y bash-completion build-essential"
     node01.vm.provision "shell", inline: "sudo apt upgrade -y"
     node01.vm.provision "shell", inline: "curl https://releases.rancher.com/install-docker/19.03.sh | sh"
     node01.vm.provision "shell", inline: "sudo usermod -aG docker vagrant"
@@ -55,6 +55,9 @@ Vagrant.configure("2") do |config|
     node01.vm.provision "shell", inline: "cd /challenge/app/; docker build -t steled/example-app ."
     node01.vm.provision "shell", inline: "sudo kubectl apply -f /challenge/app/example-app.yaml"
     node01.vm.provision "shell", inline: "cd /tmp; wget https://golang.org/dl/go1.14.7.linux-amd64.tar.gz; tar xf go1.14.7.linux-amd64.tar.gz; sudo mv go /usr/local/go-1.14"
+    node01.vm.provision "shell", inline: "sudo cp /etc/rancher/k3s/k3s.yaml ~/.kube/config"
+    node01.vm.provision "shell", inline: "sudo chown vagrant:vagrant -R ~/.kube/"
+    node01.vm.provision "shell", inline: "sudo chmod +x /challenge/scripts/test.sh"
     node01.trigger.after :up do |trigger|
       trigger.name = "Rebooting System"
       trigger.info = "Rebooting System"
