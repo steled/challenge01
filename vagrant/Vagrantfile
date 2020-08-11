@@ -24,7 +24,7 @@ Vagrant.configure("2") do |config|
   config.vm.define "node01" do |node01|
     node01.vm.hostname = "node01"
     node01.vm.provider "hyperv" do |hv|
-      hv.vmname = NODE_NAME
+      hv.vmname = NODE01_NAME
       hv.cpus = 2
       hv.memory = NODE_RAM_MB
       hv.maxmemory = NODE_RAM_MB
