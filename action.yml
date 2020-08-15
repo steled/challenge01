@@ -1,6 +1,0 @@
-# action.yml
-name: 'challenge01'
-description: 'test for challenge'
-runs:
-  using: 'docker'
-  image: 'docker://steled/example-app:latest'
